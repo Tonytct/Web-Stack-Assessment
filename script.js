@@ -8,6 +8,7 @@ function loadStaffData() {
   fetch("https://randomuser.me/api/?results=10")
     .then(res => res.json())
     .then((userData) => {
+      const users = userData.results;
       fetch("http://127.0.0.1:5000/staff")
         .then(res => res.json())
         .then((staffData) => {
@@ -16,11 +17,32 @@ function loadStaffData() {
         })
         .catch((error) => {
           console.error("Error loading staff info:", error);
+          const fallbackStaff = users.map(user => ({
+            name: user.name.first + " " + user.name.last,
+            photo: user.picture.large,
+            email: "N/A",
+            jobTitle: "N/A (Backend fetch failed)",
+            researchArea: "N/A"
+          }));
+          staffList = fallbackStaff;
+          renderStaffCards(staffList);
+          showWarning("Backend staff info could not be loaded.");
         });
     })
     .catch((error) => {
       console.error("Error loading random users:", error);
+      showWarning("Failed to load random user data.");
     });
+}
+
+function showWarning(message) {
+  const alertBox = `
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  `;
+  document.getElementById("alertPlaceholder").innerHTML = alertBox;
 }
 
 // Combine data
